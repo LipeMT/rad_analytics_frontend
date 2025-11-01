@@ -1,6 +1,6 @@
 import React from 'react';
 import { TrendingUp, ArrowUp, ArrowDown, type LucideIcon } from 'lucide-react';
-import { StatCard as StatCardType } from '../types';
+import { StatCardType } from '../types';
 
 interface StatCardProps {
   data: StatCardType;

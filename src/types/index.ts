@@ -9,7 +9,7 @@ export interface Trend {
 
 export interface StatCardType {
   title: string;
-  value: string;
+  value: number;
   change?: number;
   changeType: 'increase' | 'decrease';
 }

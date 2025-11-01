@@ -1,14 +1,8 @@
-import { Header } from './components/Header';
-import { Dashboard } from './components/Dashboard';
+import { Router } from "./routes";
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <main>
-        <Dashboard />
-      </main>
-    </div>
+    <Router />
   );
 }
 
