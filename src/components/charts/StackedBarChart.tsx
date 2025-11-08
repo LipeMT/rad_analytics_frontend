@@ -46,7 +46,7 @@ export const StackedBarChart = ({ data, keysDescription }: StackedBarChartProps)
                     }}
                         formatter={(value: number, name: string) => {
                             const label = keysDescription[name]?.label ?? name
-                            return [value.toFixed(2), label]
+                            return [value.toLocaleString('pt-BR'), label]
                         }}
                     />
                     {

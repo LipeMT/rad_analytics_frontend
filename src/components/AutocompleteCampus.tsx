@@ -6,7 +6,7 @@ interface Campus {
   nome: string;
 }
 
-const CAMPI: Campus[] = [
+export const CAMPI: Campus[] = [
   { sigla: "REITORIA", nome: "Reitoria – IF Goiano" },
   { sigla: "CMPRV", nome: "Campus Rio Verde" },
   { sigla: "CMPIPR", nome: "Campus Iporá" },
