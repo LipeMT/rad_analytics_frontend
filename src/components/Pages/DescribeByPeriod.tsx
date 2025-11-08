@@ -40,6 +40,7 @@ export const DescribeByPeriod = () => {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null);
+  const [totalRecords, setTotalRecords] = useState<BarData[]>([] as BarData[])
 
   const [data, setData] = useState<BarData[]>([] as BarData[])
 
@@ -57,9 +58,20 @@ export const DescribeByPeriod = () => {
     const url = `${base}/rad/trend${params.toString() ? `?${params}` : ""}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
-    const payload: Trend[] = await res.json();
+    const response: Trend[] = await res.json();
 
-    const total_records = payload.reduce(
+    const totalRecordsByPeriod = response.map(record => {
+      return {
+        name: record.periodo_letivo,
+        values: {
+          total: record.total_somado
+        }
+      }
+    })
+
+    setTotalRecords(totalRecordsByPeriod)
+
+    const total_records = response.reduce(
       (sum: number, p: Trend) => sum + (p?.n_registros ?? 0),
       0
     );
@@ -94,7 +106,7 @@ export const DescribeByPeriod = () => {
       setError(null);
 
       let url = `${base}/rad/describe_by_period`
-      if (queryString) url += queryString
+      if (queryString) url += '?' + queryString
 
       const res = await fetch(url, { signal: ctrl.signal });
       if (!res.ok) {
@@ -107,7 +119,7 @@ export const DescribeByPeriod = () => {
         name: h.periodo,
         values: {
           approved: h.mediana ?? 0,
-          notApproved: response.nao_homologado.find(n => n.periodo === h.periodo)?.mediana ?? 0
+          // notApproved: response.nao_homologado.find(n => n.periodo === h.periodo)?.mediana ?? 0
         }
       }));
 
@@ -139,6 +151,12 @@ export const DescribeByPeriod = () => {
     }
   }
 
+  const keysDescriptionTotalRecords = {
+    total: {
+      label: "Total", color: "#1086b9"
+    },
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       Top bar
@@ -154,12 +172,16 @@ export const DescribeByPeriod = () => {
         ))}
       </div>
 
+      <ChartBox title="Totais por Período" subtitle="Confira a quantidade total de horas dispostas em atividades" loading={loading} error={error}>
+        <StackedBarChart data={totalRecords} keysDescription={keysDescriptionTotalRecords}></StackedBarChart>
+      </ChartBox>
+
       <ChartBox title="Mediana por Período" subtitle="Confira as medianas do total homologado e não homologado" loading={loading} error={error}>
         <StackedBarChart data={data} keysDescription={keysDescription}></StackedBarChart>
       </ChartBox>
 
       {/* Tabela abaixo do gráfico */}
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-4 mt-10">
         <h3 className="text-base font-semibold text-gray-900">Detalhamento por período</h3>
         <PerformanceTable filters={filters} />
       </div>
