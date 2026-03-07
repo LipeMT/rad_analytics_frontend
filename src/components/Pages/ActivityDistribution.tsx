@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react"
-import { Filters, FiltersType } from "../Filters"
-import { ChartBox } from "../ChartBox";
-import { GenericRadarChart } from "../charts/RadarChart";
+import { useEffect, useMemo, useState } from "react";
 import { getErrorMessage } from "../../utils/getErrorMessage";
+import { ChartBox } from "../ChartBox";
+import { GenericRadarChart } from "../Charts/RadarChart";
+import { Filters, FiltersType } from "../Filters";
 
 export const ActivityDistribution = () => {
     const [data, setData] = useState<Record<string, number>>({});
@@ -73,13 +73,12 @@ export const ActivityDistribution = () => {
 
     return (
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-            Top bar
             <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900">Visão Geral</h2>
                 <Filters onApply={handleApplyFilters} />
             </div>
 
-            <ChartBox title="Distribuição de Atividades" subtitle={filters.campus ? filters.campus : "Geral"} loading={loading} error={error}>
+            <ChartBox title="Distribuição de Horas por Atividade" subtitle={filters.campus ? filters.campus : "Geral"} loading={loading} error={error}>
                 <GenericRadarChart values={data} labels={{
                     aula: "Aula",
                     ensino: "Ensino",
@@ -94,7 +93,7 @@ export const ActivityDistribution = () => {
             {/* Tabela abaixo do gráfico */}
             {/* <div className="grid grid-cols-1 gap-4 mt-10">
                 <h3 className="text-base font-semibold text-gray-900">Detalhamento por período</h3>
-                <PerformanceTable filters={filters} />
+                <Table filters={filters} />
             </div> */}
         </div>
     )

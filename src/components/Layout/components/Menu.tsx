@@ -1,4 +1,4 @@
-import { LayoutDashboardIcon, Menu, Users } from "lucide-react";
+import { BarChart, Calendar, CalendarDays, GraduationCap, Home, Menu, TrendingUp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 
@@ -8,14 +8,34 @@ export const MenuComponent = () => {
 
   const menuItems = [
     {
+      label: "Home",
+      icon: <Home className="h-4 w-4" />,
+      link: "/",
+    },
+    {
       label: "Descrição por Período",
-      icon: <LayoutDashboardIcon className="h-4 w-4" />,
+      icon: <Calendar className="h-4 w-4" />,
       link: "describe-by-period",
     },
     {
       label: "Distribuição de Atividades",
-      icon: <Users className="h-4 w-4" />,
+      icon: <BarChart className="h-4 w-4" />,
       link: "activities-distribution",
+    },
+    {
+      label: "Atividades por Período",
+      icon: <CalendarDays className="h-4 w-4" />,
+      link: "activities-by-period",
+    },
+    {
+      label: "Variação de Atividades",
+      icon: <TrendingUp className="h-4 w-4" />,
+      link: "activity-variation",
+    },
+    {
+      label: "Docentes por Atividade",
+      icon: <GraduationCap className="h-4 w-4" />,
+      link: "docents_by_activity",
     },
   ];
 

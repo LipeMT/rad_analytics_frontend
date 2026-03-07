@@ -6,7 +6,7 @@ export const DefaultLayout = () => {
     return (
         <div className="min-h-screen bg-gray-50">
             <Header />
-            <main>
+            <main className="pt-14">
                 <Outlet />
             </main>
         </div>
