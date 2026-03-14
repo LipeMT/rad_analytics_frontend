@@ -5,7 +5,7 @@ import { ChartBox } from "../ChartBox";
 import { BarChart, BarData } from "../Charts/BarChart";
 import { Filters, FiltersType } from "../Filters";
 import { StatCard } from "../StatCard";
-import { Table } from "../tables/Table";
+import { Table } from "../Tables/Table";
 
 type ApiPeriodoResumo = {
     periodo: string;

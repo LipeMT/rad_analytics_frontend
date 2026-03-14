@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { getErrorMessage } from "../../utils/getErrorMessage";
 import { ChartBox } from "../ChartBox";
 import { Filters, FiltersType } from "../Filters";
-import { VariationTable } from "../tables/VariationTable";
+import { VariationTable } from "../Tables/VariationTable";
 import { LineChart, LineData } from "../Charts/LineChart";
 import { MultiSelect } from "../MultiSelect";
 import { Eye } from "lucide-react";
