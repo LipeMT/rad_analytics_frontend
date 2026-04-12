@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { activityRadarLabels } from "../../utils/chartKeys";
+import { buildFilterSubtitle } from "../../utils/filterSummary";
 import { getErrorMessage } from "../../utils/getErrorMessage";
 import { ChartBox } from "../ChartBox";
 import { GenericRadarChart } from "../Charts/RadarChart";
@@ -48,7 +50,7 @@ export const ActivityDistribution = () => {
                 throw new Error(`HTTP ${res.status} - ${res.statusText}`);
             }
 
-            const response = await res.json(); // ex: { aula: 10, ensino: 20, ... }
+            const response = await res.json();
 
             // Garante que tudo é número e trata null/undefined
             const formatted: Record<string, number> = Object.fromEntries(
@@ -67,6 +69,8 @@ export const ActivityDistribution = () => {
         }
     }
 
+    const subtitle = useMemo(() => buildFilterSubtitle(filters), [filters]);
+
     useEffect(() => {
         fetchResults()
     }, [filters]);
@@ -78,23 +82,9 @@ export const ActivityDistribution = () => {
                 <Filters onApply={handleApplyFilters} />
             </div>
 
-            <ChartBox title="Distribuição de Horas por Atividade" subtitle={filters.campus ? filters.campus : "Geral"} loading={loading} error={error}>
-                <GenericRadarChart values={data} labels={{
-                    aula: "Aula",
-                    ensino: "Ensino",
-                    capacitacao: "Capacitação",
-                    pesquisa: "Pesquisa",
-                    extensao: "Extensão",
-                    administracao_r: "Administração"
-                }}
-                    color="#4f46e5"></GenericRadarChart>
+            <ChartBox title="Distribuição de Horas por Atividade" subtitle={subtitle} loading={loading} error={error}>
+                <GenericRadarChart values={data} labels={activityRadarLabels} color="#4f46e5"></GenericRadarChart>
             </ChartBox>
-
-            {/* Tabela abaixo do gráfico */}
-            {/* <div className="grid grid-cols-1 gap-4 mt-10">
-                <h3 className="text-base font-semibold text-gray-900">Detalhamento por período</h3>
-                <Table filters={filters} />
-            </div> */}
         </div>
     )
 }

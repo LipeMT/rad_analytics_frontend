@@ -1,5 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { StatCardType, Trend } from "../../types";
+import { approvedKeysDescription, totalRecordsKeysDescription } from "../../utils/chartKeys";
+import { exportarHTML } from "../../utils/exportToHtml";
+import { buildFilterSubtitle } from "../../utils/filterSummary";
 import { getErrorMessage } from "../../utils/getErrorMessage";
 import { ChartBox } from "../ChartBox";
 import { BarChart, BarData } from "../Charts/BarChart";
@@ -44,6 +47,7 @@ export const DescribeByPeriod = () => {
 
     const [selectedMetric, setSelectedMetric] = useState<'media' | 'mediana' | 'desvio_padrao'>('mediana');
     const [describeByPeriodHomologed, setDescribeByPeriodHomologed] = useState<ApiPeriodoResumo[]>([])
+    const tableRef = useRef<HTMLDivElement | null>(null);
 
     const base = import.meta.env.VITE_BASE_URL;
 
@@ -55,6 +59,25 @@ export const DescribeByPeriod = () => {
             }
         }));
     }, [describeByPeriodHomologed, selectedMetric]);
+
+    function periodToIndex(period: string) {
+        const [year, semester] = period.split("/");
+        return Number(year) * 2 + (semester === "2" ? 1 : 0);
+    }
+
+    function filterByPeriodRange(records: BarData[], startPeriod: string, endPeriod: string) {
+        if (!startPeriod || !endPeriod) return records;
+
+        const startIndex = periodToIndex(startPeriod);
+        const endIndex = periodToIndex(endPeriod);
+        const minIndex = Math.min(startIndex, endIndex);
+        const maxIndex = Math.max(startIndex, endIndex);
+
+        return records.filter((record) => {
+            const periodIndex = periodToIndex(record.name);
+            return periodIndex >= minIndex && periodIndex <= maxIndex;
+        });
+    }
 
     async function fetchData(active: FiltersType) {
         const params = new URLSearchParams();
@@ -70,19 +93,21 @@ export const DescribeByPeriod = () => {
         if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
         const response: Trend[] = await res.json();
 
-        const totalRecordsByPeriod = response.map(record => {
-            return {
-                name: record.periodo_letivo,
-                values: {
-                    total: record.total_somado
-                }
+        const totalRecordsByPeriod = response.map(record => ({
+            name: record.periodo_letivo,
+            values: {
+                total: record.total_somado
             }
-        })
+        }));
 
-        setTotalRecords(totalRecordsByPeriod)
+        const filteredRecords = active.startPeriod && active.endPeriod
+            ? filterByPeriodRange(totalRecordsByPeriod, active.startPeriod, active.endPeriod)
+            : totalRecordsByPeriod;
 
-        const total_records = response.reduce(
-            (sum: number, p: Trend) => sum + (p?.n_registros ?? 0),
+        setTotalRecords(filteredRecords);
+
+        const total_records = filteredRecords.reduce(
+            (sum: number, record: BarData) => sum + (record.values.total ?? 0),
             0
         );
 
@@ -144,17 +169,10 @@ export const DescribeByPeriod = () => {
         fetchDescribeByPeriod()
     }, [filters]);
 
-    const keysDescription = {
-        approved: {
-            label: "Homologado", color: "#10B981"
-        }
-    }
+    const keysDescription = approvedKeysDescription;
+    const keysDescriptionTotalRecords = totalRecordsKeysDescription;
 
-    const keysDescriptionTotalRecords = {
-        total: {
-            label: "Total", color: "#1086b9"
-        },
-    }
+    const filterSummary = useMemo(() => buildFilterSubtitle(filters), [filters]);
 
     const controls = (
         <select
@@ -181,25 +199,36 @@ export const DescribeByPeriod = () => {
                 ))}
             </div>
 
-            <ChartBox title="Totais por Período" subtitle="Confira a quantidade total de horas dispostas em atividades" loading={loading} error={error}>
+            <ChartBox title="Totais por Período" subtitle={filterSummary} loading={loading} error={error}>
                 <BarChart data={totalRecords} keysDescription={keysDescriptionTotalRecords} showLegend={false}></BarChart>
             </ChartBox>
 
             <div className="mt-10">
-                <ChartBox title={`${selectedMetric === 'media' ? 'Média' : selectedMetric === 'mediana' ? 'Mediana' : 'Desvio Padrão'} por Período`} subtitle="Confira as métricas do total homologado" loading={loading} error={error} controls={controls} >
+                <ChartBox title={`${selectedMetric === 'media' ? 'Média' : selectedMetric === 'mediana' ? 'Mediana' : 'Desvio Padrão'} por Período`} subtitle={filterSummary} loading={loading} error={error} controls={controls} >
                     <BarChart data={formattedData} keysDescription={keysDescription} showLegend={false}></BarChart>
                 </ChartBox>
             </div>
 
             <div className="grid grid-cols-1 gap-4 mt-10">
-                <h3 className="text-base font-semibold text-gray-900">Detalhamento por período</h3>
-                <Table
-                    columnsNames={{ periodo: "Período", mediana: "Mediana", media: "Média", desvio_padrao: "Desvio Padrão", minimo: "Mínimo", maximo: "Máximo", soma: "Soma" }}
-                    error={error}
-                    rows={describeByPeriodHomologed} loading={loading}
-                    showTotals
-                    totalsLabelColumn="periodo"
-                />
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <h3 className="text-base font-semibold text-gray-900">Detalhamento por período</h3>
+                    <button
+                        type="button"
+                        onClick={() => exportarHTML(tableRef, "detalhamento-por-periodo.html")}
+                        className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm hover:bg-gray-50"
+                    >
+                        Exportar tabela HTML
+                    </button>
+                </div>
+                <div ref={tableRef}>
+                    <Table
+                        columnsNames={{ periodo: "Período", mediana: "Mediana", media: "Média", desvio_padrao: "Desvio Padrão", minimo: "Mínimo", maximo: "Máximo", soma: "Soma" }}
+                        error={error}
+                        rows={describeByPeriodHomologed} loading={loading}
+                        showTotals
+                        totalsLabelColumn="periodo"
+                    />
+                </div>
             </div>
         </div>
     );

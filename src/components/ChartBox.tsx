@@ -1,6 +1,6 @@
-import { ReactNode, RefObject } from "react"
-import { exportarPNG } from "../utils/exportToPng"
 import { Download } from "lucide-react"
+import { ReactNode, RefObject, useRef } from "react"
+import { exportarPNG } from "../utils/exportToPng"
 
 export interface ChartBoxProps {
     title: string
@@ -13,6 +13,8 @@ export interface ChartBoxProps {
 }
 
 export const ChartBox = ({ title, subtitle, children, loading, error, controls, chartExport }: ChartBoxProps) => {
+    const boxRef = useRef<HTMLDivElement | null>(null)
+    const exportRef = chartExport ?? boxRef
 
     if (loading) {
         return (
@@ -34,7 +36,7 @@ export const ChartBox = ({ title, subtitle, children, loading, error, controls, 
     }
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div ref={boxRef} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             <div className="flex items-center justify-between mb-6">
 
                 <div>
@@ -47,16 +49,15 @@ export const ChartBox = ({ title, subtitle, children, loading, error, controls, 
                 </div>
                 <div className="flex items-center gap-3">
                     {controls && controls}
-                    {chartExport &&
-                        <button
-                            type="button"
-                            onClick={() => exportarPNG(chartExport, "image.png")}
-                            className="inline-flex h-9 w-10 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 shadow-sm transition hover:bg-gray-50"
-                            title="Exportar PNG"
-                            aria-label="Exportar PNG"
-                        >
-                            <Download className="h-4 w-4" />
-                        </button>}
+                    <button
+                        type="button"
+                        onClick={() => exportarPNG(exportRef, "image.png")}
+                        className="inline-flex h-9 w-10 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 shadow-sm transition hover:bg-gray-50"
+                        title="Exportar PNG"
+                        aria-label="Exportar PNG"
+                    >
+                        <Download className="h-4 w-4" />
+                    </button>
                 </div>
             </div>
             {children}

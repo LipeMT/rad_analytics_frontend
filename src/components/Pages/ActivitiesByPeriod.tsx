@@ -1,5 +1,7 @@
 import { Eye } from "lucide-react";
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { activityKeysDescription } from "../../utils/chartKeys";
+import { buildFilterSubtitle } from "../../utils/filterSummary";
 import { getErrorMessage } from "../../utils/getErrorMessage";
 import { ChartBox } from "../ChartBox";
 import { BarChart, BarData } from "../Charts/BarChart";
@@ -18,8 +20,6 @@ export const ActivitiesByPeriod = () => {
         startPeriod: "",
         endPeriod: "",
     });
-
-    const chartRef = useRef<HTMLDivElement>(null);
 
     const base = import.meta.env.VITE_BASE_URL;
 
@@ -71,19 +71,11 @@ export const ActivitiesByPeriod = () => {
         fetchActivities();
     }, [filters]);
 
-    const keysDescription = useMemo(() => {
-        const desc: { [key: string]: { label: string; color: string } } = {
-            "aula": { label: "Aula", color: "#3B82F6" },
-            "administracao_representacao": { label: "Administração/Representação", color: "#6B7280" },
-            "ensino": { label: "Ensino", color: "#10B981" },
-            "capacitacao": { label: "Capacitação", color: "#F59E0B" },
-            "extensao": { label: "Extensão", color: "#EF4444" },
-            "pesquisa": { label: "Pesquisa", color: "#8B5CF6" },
-        };
-        return desc;
-    }, [data]);
+    const keysDescription = activityKeysDescription;
 
     const [selectedKeys, setSelectedKeys] = useState<string[]>(Object.keys(keysDescription));
+
+    const subtitle = useMemo(() => buildFilterSubtitle(filters), [filters]);
 
     const controls = (
         <MultiSelect
@@ -104,16 +96,12 @@ export const ActivitiesByPeriod = () => {
 
             <ChartBox
                 title="Horas totais por período"
-                subtitle="Soma das horas de cada atividade"
+                subtitle={subtitle}
                 loading={loading}
                 error={error}
                 controls={controls}
-                chartExport={chartRef}
             >
-                <div
-                    ref={chartRef}
-                    className="rounded-lg bg-white p-4"
-                >
+                <div className="rounded-lg bg-white p-4">
                     <BarChart
                         data={data}
                         keysDescription={keysDescription}

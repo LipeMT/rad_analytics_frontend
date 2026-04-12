@@ -1,5 +1,6 @@
+import { TrendingDown, TrendingUp } from "lucide-react";
 import React, { useMemo } from "react";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { activityKeysDescription } from "../../utils/chartKeys";
 
 export type ApiResponse = Record<string, Record<string, number>>;
 
@@ -7,7 +8,7 @@ interface VariationTableProps {
   data: ApiResponse;
 }
 
-type Activity = "aula" | "ensino" | "capacitacao" | "pesquisa" | "extensao";
+type Activity = keyof typeof activityKeysDescription;
 
 type RowData = {
   activity: Activity
@@ -60,13 +61,12 @@ export const VariationTable: React.FC<VariationTableProps> = ({ data }) => {
     );
   }
 
-  const activityLabels = {
-    "aula": "Aula",
-    "ensino": "Ensino",
-    "capacitacao": "Capacitação",
-    "pesquisa": "Pesquisa",
-    "extensao": "Extensão",
-  }
+  const activityLabels = Object.fromEntries(
+    (Object.keys(activityKeysDescription) as Activity[]).map((activity) => [
+      activity,
+      activityKeysDescription[activity]?.label ?? activity,
+    ])
+  ) as Record<Activity, string>;
 
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-200 scrollbar-thin scrollbar-thumb-gray-300">
